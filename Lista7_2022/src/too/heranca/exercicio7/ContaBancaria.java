@@ -82,5 +82,4 @@ public class ContaBancaria {
 		return String.format("numeroAgencia: %s, numeroConta: %s, saldo: %s, dataAbertura: %s, cliente: %s",
 				numeroAgencia, numeroConta, saldo(), dataAbertura, cliente);
 	}
-	
 }

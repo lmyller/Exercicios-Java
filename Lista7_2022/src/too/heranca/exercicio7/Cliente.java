@@ -1,17 +1,15 @@
 package too.heranca.exercicio7;
 
 public class Cliente {
-	private String nome, cpf, usuario, senha;
+	private String nome, cpf;
 
 	public Cliente() {
-		nome = cpf = usuario = senha = "";
+		nome = cpf = "";
 	}
 	
 	public Cliente(String nome, String cpf, String usuario, String senha) {
 		this.nome = nome;
 		this.cpf = cpf;
-		this.usuario = usuario;
-		this.senha = senha;
 	}
 
 	public String getNome() {
@@ -22,28 +20,12 @@ public class Cliente {
 		this.nome = nome;
 	}
 
-	public String getUsuario() {
-		return usuario;
-	}
-
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
-	}
-
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
-
 	public String getCpf() {
 		return cpf;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("nome: %s, cpf: %s, usuario: %s", nome, cpf, usuario);
+		return String.format("nome: %s, cpf: %s", nome, cpf);
 	}
 }
