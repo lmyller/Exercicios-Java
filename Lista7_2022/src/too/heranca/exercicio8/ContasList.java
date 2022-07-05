@@ -23,4 +23,8 @@ public class ContasList {
 	public int quantidadeContas() {
 		return contaBancariasList.size();
 	}
+	
+	public static ContasList criarContasList() {
+		return new ContasList();
+	}
 }
