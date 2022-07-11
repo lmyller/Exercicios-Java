@@ -1,11 +1,12 @@
 package too.heranca.exercicio8;
 
-import static too.heranca.gui.EntradaESaida.exibirMensagemDeErro;
-import static too.heranca.gui.EntradaESaida.lerNumeroInteiro;
-import static too.heranca.gui.EntradaESaida.lerString;
-import static too.heranca.gui.EntradaESaida.menu;
+import static too.heranca.gui.EntradaESaida.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Date;
 
 import javax.swing.JOptionPane;
 
@@ -27,15 +28,27 @@ public class BancoVirtual {
 								RELATORIO = "Relatório",
 								DIGITE_CPF = "CPF: ",
 								CPF_INVALIDO = "CPF inválido!",
-								DIGITE_NOME = "Nome ",
-								DIGITE_SENHA = "Senha: ",
-								DIGITE_SENHA_NOVAMENTE = "Confirmar senha: ",
-								DIGITE_NUMERO_AGENCIA = "Numero da agência: ",
+								DIGITE_NOME = "Nome:",
+								DIGITE_SENHA = "Senha:",
+								DIGITE_SENHA_NOVAMENTE = "Confirmar senha:",
+								DIGITE_NUMERO_AGENCIA = "Número da agência:",
+								DIGITE_NUMERO_CONTA = "Número da conta: ",
 								SENHAS_DIFERENTES = "Senhas diferentes!",
 								ESCOLHA_TIPO_CONTA = "Escolha tipo da conta",
 								CONTA_CORRENTE = "Conta corrente",
 								CONTA_POUPANCA = "Conta poupanca",
 								CONTA_REMUNERADA = "Conta remunerada",
+								CONTA_NAO_ENCONTRADA = "Conta não encontrada!",
+								DEPOSITO_REALIZADO = "Depósito realizado com sucesso!",
+								SAQUE_REALIZADO = "Saque realizado com sucesso!",
+								TRANSFERENCIA_REALIZADO = "Transferência realizada com sucesso!",
+								ERRO_DEPOSITO = "Erro ao realizar o depósito!",
+								ERRO_SAQUE = "Erro ao realizar o saque!",
+								ERRO_TRANSFERENCIA = "Erro ao realizar a transferência!",
+								OPERACAO_CANCELADA = "Operação cancelada!",
+								SENHA_INVÁLIDA = "Senha Inválida!",
+								TENTATIVAS_ESGOTADAS = "Tentativas esgotadas!", 
+								DIGITE_VALOR = "Valor de depósito:",
 								SAIR = "Sair";
 	
 	private static final int COMANDO_ABRIR_CONTA = 0,
@@ -75,10 +88,11 @@ public class BancoVirtual {
 				break;
 			
 			switch (opcao) {
-			case COMANDO_ABRIR_CONTA: abrirConta(contasList);
-				
-				break;
-
+			case COMANDO_ABRIR_CONTA: abrirConta(contasList); break;
+			case COMANDO_DEPOSITO: deposito(contasList); break;
+			case COMANDO_SAQUE: saque(contasList); break;
+			case COMANDO_TRANSFERENCIA: transferencia(contasList); break;
+			case COMANDO_RELATORIO: relatorio(contasList); break;
 			default:
 				break;
 			}
@@ -167,6 +181,149 @@ public class BancoVirtual {
 		}
 		return senha;
 	}
+	
+	private void deposito(ContasList contasList) {
+		ContaBancaria contaBancaria;
+		String numeroAgencia = lerString(DIGITE_NUMERO_AGENCIA, TITULO),
+			   numeroConta = lerString(DIGITE_NUMERO_CONTA, TITULO);
+		
+		if(numeroAgencia == null || numeroConta == null)
+			return;
+		
+		contaBancaria = pesquisarConta(contasList, numeroAgencia, numeroConta);
+		if(contaBancaria == null)
+			exibirMensagemDeErro(CONTA_NAO_ENCONTRADA, TITULO);
+		
+		else {
+			float valor = lerNumeroReal(DIGITE_VALOR, TITULO);
+			if(contaBancaria.deposito(valor))
+				exibirMensagemInformativa(DEPOSITO_REALIZADO, TITULO);
+			
+			else {
+				exibirMensagemDeErro(ERRO_DEPOSITO, TITULO);
+				exibirMensagemDeErro(OPERACAO_CANCELADA, TITULO);
+			}
+		}
+	}
+	
+	private void saque(ContasList contasList) {
+		ContaBancaria contaBancaria;
+		String numeroAgencia = lerString(DIGITE_NUMERO_AGENCIA, TITULO),
+			   numeroConta = lerString(DIGITE_NUMERO_CONTA, TITULO);
+		
+		if(numeroAgencia == null || numeroConta == null)
+			return;
+		
+		contaBancaria = pesquisarConta(contasList, numeroAgencia, numeroConta);
+		if(contaBancaria == null)
+			exibirMensagemDeErro(CONTA_NAO_ENCONTRADA, TITULO);
+		
+		else {
+			if(!verificarSenha(contaBancaria.getSenha()))
+				return;
+			
+			float valor = lerNumeroReal(DIGITE_VALOR, TITULO);
+			if(contaBancaria.saque(valor))
+				exibirMensagemInformativa(SAQUE_REALIZADO, TITULO);
+			
+			else {
+				exibirMensagemDeErro(ERRO_SAQUE, TITULO);
+				exibirMensagemDeErro(OPERACAO_CANCELADA, TITULO);
+			}
+		}
+	}
+
+	private void transferencia(ContasList contasList) {
+		ContaBancaria contaBancariaOrigem, contaBancariaDestino;
+		String numeroAgencia = lerString(DIGITE_NUMERO_AGENCIA, TITULO),
+			   numeroConta = lerString(DIGITE_NUMERO_CONTA, TITULO);
+		
+		if(numeroAgencia == null || numeroConta == null)
+			return;
+		
+		contaBancariaOrigem = pesquisarConta(contasList, numeroAgencia, numeroConta);
+		if(contaBancariaOrigem == null)
+			exibirMensagemDeErro(CONTA_NAO_ENCONTRADA, TITULO);
+		
+		else {
+			if(!verificarSenha(contaBancariaOrigem.getSenha()))
+				return;
+			
+			float valor = lerNumeroReal(DIGITE_VALOR, TITULO);
+			if(contaBancariaOrigem.saque(valor)) {
+				numeroAgencia = lerString(DIGITE_NUMERO_AGENCIA, TITULO);
+				numeroConta = lerString(DIGITE_NUMERO_CONTA, TITULO);
+				
+				contaBancariaDestino = pesquisarConta(contasList, numeroAgencia, numeroConta);
+				if(contaBancariaDestino == null) {
+					exibirMensagemDeErro(CONTA_NAO_ENCONTRADA, TITULO);
+					exibirMensagemDeErro(OPERACAO_CANCELADA, TITULO);
+					contaBancariaOrigem.deposito(valor);
+				}
+				
+				else {
+					if(contaBancariaDestino.deposito(valor)) 
+						exibirMensagemInformativa(TRANSFERENCIA_REALIZADO, TITULO);
+					
+					else {
+						exibirMensagemDeErro(ERRO_TRANSFERENCIA, TITULO);
+						exibirMensagemDeErro(OPERACAO_CANCELADA, TITULO);
+					}
+				}
+			}
+			
+			else {
+				exibirMensagemDeErro(ERRO_SAQUE, TITULO);
+				exibirMensagemDeErro(OPERACAO_CANCELADA, TITULO);
+			}
+		}
+	}
+	
+	private boolean verificarSenha(String senha) {
+		int tentativa = 0;
+				
+		while(true) {
+			if(senha.equals(lerString(DIGITE_SENHA, TITULO)))
+				return true;
+			
+			else
+				exibirMensagemDeErro(SENHA_INVÁLIDA, TITULO);
+			
+			tentativa++;
+			if(tentativa == 3) {
+				exibirMensagemDeErro(TENTATIVAS_ESGOTADAS, TITULO);
+				exibirMensagemDeErro(OPERACAO_CANCELADA, TITULO);
+				break;
+			}
+		}
+		return false;
+	}
+	
+	private ContaBancaria pesquisarConta(ContasList contasList, String numeroAgencia, String numeroConta) {
+		ContaBancaria contaBancaria;
+		
+		for(int indice = 0; indice < contasList.quantidadeContas(); indice++) {
+			contaBancaria = contasList.obterContaBancaria(indice);
+			if(contaBancaria.getNumeroConta() == numeroConta && contaBancaria.getNumeroAgencia() == Integer.parseInt(numeroAgencia))
+				return contaBancaria;
+		}
+		return null;
+	}
+	
+	private void relatorio(ContasList contasList) {
+		StringBuilder stringBuilder = new StringBuilder();
+		
+		stringBuilder.append(formatarData(obterDataAtual()));
+		stringBuilder.append(formatarHora(obterHoraAtual()));
+		
+		for(int indice = 0; indice < contasList.quantidadeContas(); indice++) {
+			ContaBancaria conta = contasList.obterContaBancaria(indice);
+			
+			stringBuilder.append(String.format("%s. %s     %s\tR$ %,1.2f    %s", conta.getNumeroConta(), conta.getCliente().getNome(),
+												conta.getCliente().getCpf(), conta.saldo(), conta.getDataAbertura()));
+		}
+		exibirCaixaDeTexto(stringBuilder.toString(), TITULO, contasList.quantidadeContas() + 10, 1000);
+	}
 
 	private ContaBancaria criarConta(String cpf, String nome, String senha, int numeroAgencia, int tipoContaBancaria, int quantidadeContas) {
 		switch (tipoContaBancaria) {
@@ -184,17 +341,17 @@ public class BancoVirtual {
 
 	private ContaBancaria criarContaPoupanca(Cliente cliente, String senha, int numeroAgencia, int quantidadeContas) {
 		return new ContaPoupanca(numeroAgencia, gerarNumeroConta(quantidadeContas, CONTA_POUPANCA), senha, SALDO_INICIAL_CONTA_POUPANCA, 
-								 obterDataAtual(), cliente);
+								 formatarData(obterDataAtual()), cliente);
 	}
 	
 	private ContaBancaria criarContaCorrente(Cliente cliente, String senha, int numeroAgencia, int quantidadeContas) {
 		return new ContaCorrente(numeroAgencia, gerarNumeroConta(quantidadeContas, CONTA_POUPANCA), senha, SALDO_INICIAL_CONTA_CORRENTE,
-								 obterDataAtual(), cliente);
+								 formatarData(obterDataAtual()), cliente);
 	}
 	
 	private ContaBancaria criarContaRemunerada(Cliente cliente, String senha, int numeroAgencia, int quantidadeContas) {
 		return new ContaRemunerada(numeroAgencia, gerarNumeroConta(quantidadeContas, CONTA_POUPANCA), senha, SALDO_INICIAL_CONTA_REMUNERADA,
-								   obterDataAtual(), cliente);
+								   formatarData(obterDataAtual()), cliente);
 	}
 
 	private String gerarNumeroConta(int quantidadeContas, String contaPoupanca) {
@@ -206,9 +363,25 @@ public class BancoVirtual {
 		default: return null;
 		}
 	}
+	
+	private String formatarHora(LocalTime hora) {
+		DateFormat formatter = new SimpleDateFormat("HH:mm");
+		
+		return formatter.format(hora);
+	}
+
+	private LocalTime obterHoraAtual() {
+		return LocalTime.now();
+	}
+
+	private String formatarData(LocalDate data) {
+		DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		
+		return formatter.format(data);
+	}
 
 	private LocalDate obterDataAtual() {
-		return LocalDate.now();
+		return new Date().;
 	}
 
 	private int escolherTipoConta() {

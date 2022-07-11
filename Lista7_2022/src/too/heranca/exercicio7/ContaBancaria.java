@@ -6,14 +6,14 @@ public class ContaBancaria {
 	private int numeroAgencia;
 	private String numeroConta, senha;
 	private float valor;
-	private LocalDate dataAbertura;
+	private String dataAbertura;
 	private Cliente cliente;
 	
 	public ContaBancaria() {
 		numeroConta = senha = "";
 	}
 
-	public ContaBancaria(int numeroAgencia, String numeroConta, String senha, float valor, LocalDate dataAbertura,
+	public ContaBancaria(int numeroAgencia, String numeroConta, String senha, float valor, String dataAbertura,
 			Cliente cliente) {
 		this.numeroAgencia = numeroAgencia;
 		this.numeroConta = numeroConta;
@@ -69,7 +69,7 @@ public class ContaBancaria {
 		this.senha = senha;
 	}
 
-	public LocalDate getDataAbertura() {
+	public String getDataAbertura() {
 		return dataAbertura;
 	}
 

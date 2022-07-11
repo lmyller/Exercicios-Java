@@ -2,6 +2,9 @@ package too.heranca.gui;
 
 import static javax.swing.JOptionPane.*;
 
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
 public class EntradaESaida {
 
 	public static int menu(String mensagem, String titulo, String[] opcoes) {
@@ -12,6 +15,16 @@ public class EntradaESaida {
 		return showInputDialog(null, mensagem, titulo, QUESTION_MESSAGE);
 	}
 
+	public static void exibirCaixaDeTexto(String mensagem, String titulo, int linhas, int colunas) {
+		JTextArea textArea = new JTextArea(linhas, colunas);
+		
+		textArea.setEditable(false);
+		textArea.setLineWrap(false);
+		textArea.setText(mensagem);
+		
+		exibirMensagem(new JScrollPane(textArea), titulo, INFORMATION_MESSAGE);
+	}
+	
 	public static int lerNumeroInteiro(String mensagem, String titulo) {
 		while(true) {
 			String string = lerString(mensagem, titulo);
@@ -38,6 +51,10 @@ public class EntradaESaida {
 	
 	public static void exibirMensagem(String mensagem, String titulo, int tipoMensagem) {
 		showMessageDialog(null, mensagem, titulo, tipoMensagem);
+	}
+	
+	public static void exibirMensagem(Object object, String titulo, int tipoMensagem) {
+		showMessageDialog(null, object, titulo, tipoMensagem);
 	}
 	
 	public static void exibirMensagemInformativa(String mensagem, String titulo) {
