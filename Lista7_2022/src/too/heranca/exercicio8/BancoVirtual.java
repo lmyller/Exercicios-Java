@@ -1,11 +1,17 @@
 package too.heranca.exercicio8;
 
-import static too.heranca.gui.EntradaESaida.*;
+import static too.heranca.gui.EntradaESaida.exibirCaixaDeTexto;
+import static too.heranca.gui.EntradaESaida.exibirMensagemDeErro;
+import static too.heranca.gui.EntradaESaida.exibirMensagemInformativa;
+import static too.heranca.gui.EntradaESaida.lerNumeroInteiro;
+import static too.heranca.gui.EntradaESaida.lerNumeroReal;
+import static too.heranca.gui.EntradaESaida.lerString;
+import static too.heranca.gui.EntradaESaida.menu;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.Period;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
@@ -95,6 +101,7 @@ public class BancoVirtual {
 			
 			switch (opcao) {
 			case COMANDO_ABRIR_CONTA: abrirConta(contasList); break;
+			case COMANDO_SALDO: saldo(contasList); break;
 			case COMANDO_DEPOSITO: deposito(contasList); break;
 			case COMANDO_SAQUE: saque(contasList); break;
 			case COMANDO_TRANSFERENCIA: transferencia(contasList); break;
@@ -188,6 +195,45 @@ public class BancoVirtual {
 		return senha;
 	}
 	
+	private void saldo(ContasList contasList) {
+		ContaBancaria contaBancaria;
+		String numeroAgencia = lerString(DIGITE_NUMERO_AGENCIA, TITULO),
+			   numeroConta = lerString(DIGITE_NUMERO_CONTA, TITULO);
+		
+		if(numeroAgencia == null || numeroConta == null)
+			return;
+		
+		contaBancaria = pesquisarConta(contasList, numeroAgencia, numeroConta);
+		if(contaBancaria == null)
+			exibirMensagemDeErro(CONTA_NAO_ENCONTRADA, TITULO);
+		
+		else {
+			if(!verificarSenha(contaBancaria.getSenha()))
+				return;
+			
+			LocalDate dataContaBancaria = formatarDataParaLocalDate(contaBancaria.getDataAbertura());
+			LocalDate dataAtual = formatarDataParaLocalDate(obterDataAtual());
+			
+			int dias = Period.between(dataContaBancaria, dataAtual).getDays();
+			
+			if(contaBancaria.getNumeroConta().charAt(0) == TIPO_CONTA_POUPANCA) 
+				exibirMensagemInformativa(String.format("%,1.2f", contaBancaria.saldo() * (0.005 * dias / 30)), TITULO);
+			
+			if(contaBancaria.getNumeroConta().charAt(0) == TIPO_CONTA_REMUNERADA) 
+				exibirMensagemInformativa(String.format("%,1.2f", contaBancaria.saldo() * (0.0002 * dias)), TITULO);
+			
+		}
+	}
+	
+	private LocalDate formatarDataParaLocalDate(String data) {
+		String[] dataSplit = data.split("/");
+		int dia = Integer.parseInt(dataSplit[0]),
+			mes = Integer.parseInt(dataSplit[1]),
+			ano = Integer.parseInt(dataSplit[2]);
+		
+		return LocalDate.of(dia, mes, ano);
+	}
+
 	private void deposito(ContasList contasList) {
 		ContaBancaria contaBancaria;
 		String numeroAgencia = lerString(DIGITE_NUMERO_AGENCIA, TITULO),
